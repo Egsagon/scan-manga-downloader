@@ -923,34 +923,42 @@ const LoadLeL = () => {
   if (!sme || !sml || sme == "" || sml == "") {
     alert("Erreur");
   }
-  fetch(`${"/api/lel/"}${idc}${".json"}`, {method: "POST", credentials: "omit", headers: {"Content-type": "application/json; charset=UTF-8", source: window.location.href, Token: "sm"}, body: JSON.stringify({a: sme, b: sml})}).then(_0xcefdxde => {
-    return _0xcefdxde.text();
-  }).then(_0xcefdxad => {
-    if (_0xcefdxad == "[]") {
+  fetch(`${"/api/lel/"}${idc}${".json"}`, {method: "POST", credentials: "omit", headers: {"Content-type": "application/json; charset=UTF-8", source: window.location.href, Token: "sm"}, body: JSON.stringify({a: sme, b: sml})}).then(response => {
+    return response.text();
+  }).then(response_text => {
+    if (response_text == "[]") {
       alertChapterNotAvailable(300);
       return;
     }
     try {
-      const _0xcefdxae = JSON.parse(_0xcefdxad);
-      if (_0xcefdxae.error) {
-        alertChapterNotAvailable(_0xcefdxae.error);
+      const decrypted_chapter_data = JSON.parse(response_text);
+      if (decrypted_chapter_data.error) {
+        alertChapterNotAvailable(decrypted_chapter_data.error);
       }
       return;
     } catch (error) {}
     clearTimeout(_0xcefdxab);
     container.classList.remove("loading-data");
-    var _0xcefdxaf = JSON.parse(atob(_0xcefdxad.replace(new RegExp(idc.toString(16) + "$"), "").split("").reverse().join("")));
+    
+    var parsed_chapter_data = JSON.parse(
+      atob(
+        response_text.replace(
+          new RegExp(idc.toString(16) + "$"), ""
+        ).split("").reverse().join("")
+      )
+    );
+    
     const _0xcefdxb0 = document.querySelector(".navigation");
     const _0xcefdx90 = document.querySelector("#navigation_bot");
     const _0xcefdxb1 = _0xcefdxb0.querySelector(".arrow.left");
     const _0xcefdxb2 = _0xcefdxb0.querySelector(".arrow.right");
     const _0xcefdxb3 = () => {
-      if (_0xcefdxaf.m == null) {
+      if (parsed_chapter_data.m == null) {
         alertChapterNotAvailable(301);
         return;
       } else {
-        if (!isNaN(_0xcefdxaf.m)) {
-          fetch(`${"/api/chapter/"}${_0xcefdxaf.m}${".json"}${dd === 1 ? `${"?d=1"}` : ""}${""}`, {method: "GET", credentials: "omit", headers: {"Content-type": "application/json; charset=UTF-8", Token: "sm"}}).then(_0xcefdxde => {
+        if (!isNaN(parsed_chapter_data.m)) {
+          fetch(`${"/api/chapter/"}${parsed_chapter_data.m}${".json"}${dd === 1 ? `${"?d=1"}` : ""}${""}`, {method: "GET", credentials: "omit", headers: {"Content-type": "application/json; charset=UTF-8", Token: "sm"}}).then(_0xcefdxde => {
             return _0xcefdxde.json();
           }).then(_0xcefdxb4 => {
             var _0xcefdxb5 = [];
@@ -1356,40 +1364,41 @@ const LoadLeL = () => {
       var _0xcefdxfe = new Hammer(readerClickNav);
       _0xcefdxfe.on("swipeleft swiperight", _0xcefdxfc);
     };
-    _0xcefdxdf(_0xcefdxaf);
-    processResponseData(_0xcefdxaf);
+    _0xcefdxdf(parsed_chapter_data);
+    processResponseData(parsed_chapter_data);
   }).catch(function (_0xcefdxac) {
     console.log("Erreur chargement json : ", _0xcefdxac);
   });
 };
-const processResponseData = async _0xcefdxaf => {
-  if (!_0xcefdxaf.hasOwnProperty("p")) {
+const processResponseData = async data => {
+  if (!data.hasOwnProperty("p")) {
     return false;
   }
-  const _0xcefdx100 = Object.keys(_0xcefdxaf.p).length;
-  loadAlert = _0xcefdxaf.l;
-  let _0xcefdx101 = 0;
+  const number_of_pages = Object.keys(data.p).length;
+  loadAlert = data.l;
+  let is_mobile_quality = 0;
   await setQuality();
   if (toggleQuality.dataset.active == "0") {
-    _0xcefdx101 = 1;
+    is_mobile_quality = 1;
   }
-  let _0xcefdx102 = _0xcefdxaf.dN;
-  if (_0xcefdx101 == 1) {
-    _0xcefdx102 = _0xcefdxaf.dC;
+  let data_dn = data.dN;
+  if (is_mobile_quality == 1) {
+    data_dn = data.dC;
   }
-  let _0xcefdx103 = `${"/"}${_0xcefdxaf.s}${"/"}${_0xcefdxaf.v}${"/"}${_0xcefdxaf.c}${""}`;
-  var _0xcefdx104 = `${"https://"}${_0xcefdx102}${""}${_0xcefdx103}${""}`;
-  var _0xcefdx105 = Object.keys(_0xcefdxaf.p).map(_0xcefdxdd => {
-    const _0xcefdx106 = _0xcefdxaf.p[_0xcefdxdd];
-    var _0xcefdx107 = _0xcefdx104;
-    var _0xcefdx108 = _0xcefdx106.e;
-    if (_0xcefdx101 == 1) {
-      _0xcefdx108 = "jpg";
-      _0xcefdx107 += "/mobile";
+  let _0xcefdx103 = `${"/"}${data.s}${"/"}${data.v}${"/"}${data.c}${""}`;
+  var base_url = `${"https://"}${data_dn}${""}${_0xcefdx103}${""}`;
+
+  var _0xcefdx105 = Object.keys(data.p).map(page => {
+    const page_content = data.p[page];
+    var page_url = base_url;
+    var image_extension = page_content.e;
+    if (is_mobile_quality == 1) {
+      image_extension = "jpg";
+      page_url += "/mobile";
     }
-    const _0xcefdx109 = `${"/"}${encodeURIComponent(_0xcefdx106.f)}${"."}${_0xcefdx108}${""}`;
-    _0xcefdx107 += _0xcefdx109;
-    return _0xcefdx107;
+    const page_name = `${"/"}${encodeURIComponent(page_content.f)}${"."}${image_extension}${""}`;
+    page_url += _0xcefdx109;
+    return page_url;
   });
   const _0xcefdx10a = async (_0xcefdx9a, _0xcefdx6c, _0xcefdx10b) => {
     if (_0xcefdx6c.dataset.loaded === "1") {
@@ -1418,7 +1427,7 @@ const processResponseData = async _0xcefdxaf => {
           const _0xcefdx116 = Math.round(_0xcefdx111 / _0xcefdx110 * 100 / 5) * 5;
           const _0xcefdx117 = Math.round(_0xcefdx111 / _0xcefdx110 * 100);
           _0xcefdx6c.style.setProperty("--before-width", `${""}${_0xcefdx116}${"%"}`);
-          _0xcefdx6c.style.setProperty("--before-content", `${"'"}${_0xcefdx10d}${"/"}${_0xcefdx100}${" • "}${_0xcefdx117}${"%'"}`);
+          _0xcefdx6c.style.setProperty("--before-content", `${"'"}${_0xcefdx10d}${"/"}${number_of_pages}${" • "}${_0xcefdx117}${"%'"}`);
           _0xcefdx114.enqueue(value);
           await _0xcefdx115();
         }
@@ -1480,8 +1489,8 @@ const processResponseData = async _0xcefdxaf => {
   const _0xcefdx120 = (_0xcefdx121, _0xcefdxdd, _0xcefdx122) => {
     let _0xcefdx123 = 0;
     let _0xcefdx124 = 0;
-    for (let _0xcefdx54 = _0xcefdx121 + 1; _0xcefdx54 < _0xcefdx122 && _0xcefdxaf.p[_0xcefdx54] && _0xcefdxaf.p[_0xcefdx54][_0xcefdxdd]; _0xcefdx54++) {
-      _0xcefdx123 += parseInt(_0xcefdxaf.p[_0xcefdx54][_0xcefdxdd]);
+    for (let _0xcefdx54 = _0xcefdx121 + 1; _0xcefdx54 < _0xcefdx122 && data.p[_0xcefdx54] && data.p[_0xcefdx54][_0xcefdxdd]; _0xcefdx54++) {
+      _0xcefdx123 += parseInt(data.p[_0xcefdx54][_0xcefdxdd]);
       _0xcefdx124++;
       if (_0xcefdx123 >= _0xcefdx122) {
         return _0xcefdx124;
@@ -1528,8 +1537,8 @@ const processResponseData = async _0xcefdxaf => {
     const _0xcefdx6c = document.getElementById("container");
     let _0xcefdx12f = window.innerWidth;
     return new Promise((_0xcefdx6a, _0xcefdx11d) => {
-      for (let _0xcefdx54 = 0; _0xcefdx54 < Object.entries(_0xcefdxaf.p).length; _0xcefdx54++) {
-        const [key, infos_image] = Object.entries(_0xcefdxaf.p)[_0xcefdx54];
+      for (let _0xcefdx54 = 0; _0xcefdx54 < Object.entries(data.p).length; _0xcefdx54++) {
+        const [key, infos_image] = Object.entries(data.p)[_0xcefdx54];
         const _0xcefdx70 = document.createElement("div");
         _0xcefdx70.className = `${"image-container "}${mode}${" Default"}${DefaultMode}${""}`;
         if (!NotDesktop || window.innerWidth >= 1024) {
@@ -1541,7 +1550,7 @@ const processResponseData = async _0xcefdxaf => {
         if (_0xcefdx54 === 0) {
           _0xcefdx70.classList.add("first");
         } else {
-          if (_0xcefdx54 + 1 == Object.keys(_0xcefdxaf.p).length) {
+          if (_0xcefdx54 + 1 == Object.keys(data.p).length) {
             _0xcefdx70.classList.add("last");
           }
         }
@@ -1558,7 +1567,7 @@ const processResponseData = async _0xcefdxaf => {
           _0xcefdx132.innerText = key;
           listPages.appendChild(_0xcefdx132);
         }
-        if (_0xcefdx54 + 1 === Object.keys(_0xcefdxaf.p).length) {
+        if (_0xcefdx54 + 1 === Object.keys(data.p).length) {
           _0xcefdx6c.dataset.nbpage = _0xcefdx54 + 1;
           _0xcefdx6a();
         }
@@ -1671,7 +1680,7 @@ const processResponseData = async _0xcefdxaf => {
         recLelParametre("quality", toggleQuality.dataset.active);
         container.textContent = "";
         imageContainers = null;
-        processResponseData(_0xcefdxaf);
+        processResponseData(data);
       } else {
         toggleQuality.dataset.active = "0";
       }

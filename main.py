@@ -1,7 +1,6 @@
 import re
 import json
 import requests
-from urllib.parse import unquote
 
 import decoder
 
@@ -35,33 +34,41 @@ chapters = fetch(root + f'api/chapter/{manga_id}.json').json()
 # >>=>> Select a chapter
 chapter = chapters['c'][0] # chapter 0
 chapter_title = chapter['t']
-chapter_url = f'api/lel/{chapter["i"]}.json'
+chapter_idc = chapter['i']
+chapter_url = f'api/lel/{chapter_idc}.json'
 
-# >>=> Get encryption keys
+# >>=>> Get encryption keys
 script = re_sm_tuples.findall(manga_page)[0]
 raw = decoder.decode(script)
 sme_key, sm_iv, sm_data = re_sm_data.findall(raw)[0]
 
-sml = unquote(sm_data)
-sme = decoder.encrypt_sm(sm_data, sme_key, sm_iv)
+sml, sme = decoder.encrypt_sm(sm_data, sme_key, sm_iv)
 
-# >>=> Fetch chapter data
+# >>=>> Fetch chapter data
 payload = json.dumps({'a': sme, 'b': sml})
 
-print(root + chapter_url)
-print(payload)
+encrypted = fetch(
+  url = root + chapter_url,
+  method = 'POST',
+  data = payload,
+  headers = {
+    'Origin': 'https://www.scan-manga.com',
+    'source': manga_url,
+    'Token': 'sm'
+  }
+).text
 
-encrypted = fetch(root + chapter_url, 'POST', payload,
-                  {'Content-type': 'application/json; charset=UTF-8',
-                   'source': None,
-                   'Token': 'sm'}).text
-
-print(encrypted)
-
-# >>=> Decrypt chapter data
-...
+# >>=>> Decrypt chapter data
+chapter_data = decoder.decode_chapter(encrypted, chapter_idc)
 
 # >>=>> Download data
-...
+domain = chapter_data['dN']
+manga_slug = chapter_data['s']
+
+base_url = f'https://{domain}/{manga_slug}/{chapter_data["v"]}/{chapter_data["c"]}/'
+
+images = [ base_url + page['f'] + '.' + page['e'] for page in chapter_data['p'].values() ]
+
+print(domain)
 
 # EOF

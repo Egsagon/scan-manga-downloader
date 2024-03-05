@@ -1,6 +1,9 @@
+import re
+import json
 import base64
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
+from urllib.parse import unquote_to_bytes
 
 def _single_decode(d: str, e: int, f: int):
     g = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/'
@@ -40,14 +43,30 @@ def decode(data: tuple[str | int]):
     
     return result
 
-def encrypt_sm(data: str, key: str, iv: str):
+def encrypt_sm(data: str, key: str, iv: str) -> tuple[str]:
     key = bytes.fromhex(key)
     iv = bytes.fromhex(iv)
 
     cipher = AES.new(key, AES.MODE_CBC, iv)
-    padded_data = pad(data.encode(), AES.block_size)
+    uri = unquote_to_bytes(data)
+    padded_data = pad(uri, AES.block_size)
     ciphertext = cipher.encrypt(padded_data)
 
-    return padded_data, base64.b64encode(ciphertext).decode()
+    return uri.decode(), base64.b64encode(ciphertext).decode()
+
+def decode_chapter(data: str, idc: int) -> str:
+    
+    # JSON.parse(atob(response_text.replace(new RegExp(idc.toString(16) + "$"), "").split("").reverse().join("")));
+    
+    rule = hex(idc)[2:] + '$'
+    raw = re.sub(rule, '', data)[::-1]
+    
+    padding = len(raw) % 4
+    if padding:
+        raw += '=' * (4 - padding)
+    
+    buffer = base64.b64decode(raw)
+    return json.loads(buffer)
+
 
 # EOF

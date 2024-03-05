@@ -117,4 +117,6 @@ for chapter in tqdm.tqdm(chapters, desc = 'Total'):
     with open(image_name, 'wb') as file:
       file.write(req.content)
 
+print(f'Success. Downloaded at `{manga_dir}`.')
+
 # EOF

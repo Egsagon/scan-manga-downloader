@@ -65,10 +65,20 @@ chapter_data = decoder.decode_chapter(encrypted, chapter_idc)
 domain = chapter_data['dN']
 manga_slug = chapter_data['s']
 
+domain = 'data2.scan-manga.com'
+
 base_url = f'https://{domain}/{manga_slug}/{chapter_data["v"]}/{chapter_data["c"]}/'
 
 images = [ base_url + page['f'] + '.' + page['e'] for page in chapter_data['p'].values() ]
 
-print(domain)
+subject = images[0]
+
+req = fetch(subject, headers = {
+  'Origin': 'https://www.scan-manga.com',
+  'Referer': 'https://www.scan-manga.com/lecture-en-ligne/Tensei-Shitara-Slime-Datta-Ken-Chapitre-102-FR_285197.html'
+})
+
+with open('temp.png', 'wb') as file:
+  file.write(req.content)
 
 # EOF

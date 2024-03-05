@@ -1388,7 +1388,7 @@ const processResponseData = async data => {
   let _0xcefdx103 = `${"/"}${data.s}${"/"}${data.v}${"/"}${data.c}${""}`;
   var base_url = `${"https://"}${data_dn}${""}${_0xcefdx103}${""}`;
 
-  var _0xcefdx105 = Object.keys(data.p).map(page => {
+  var all_image_urls = Object.keys(data.p).map(page => {
     const page_content = data.p[page];
     var page_url = base_url;
     var image_extension = page_content.e;
@@ -1504,7 +1504,7 @@ const processResponseData = async data => {
         const _0xcefdx128 = _0xcefdx127[_0xcefdx54];
         const _0xcefdx6c = _0xcefdx128.target;
         const _0xcefdx8e = parseInt(_0xcefdx6c.dataset.page);
-        const _0xcefdx9a = _0xcefdx105[_0xcefdx8e - 1];
+        const _0xcefdx9a = all_image_urls[_0xcefdx8e - 1];
         if (_0xcefdx128.isIntersecting) {
           if (_0xcefdx6c.dataset.loaded !== "1") {
             if (!_0xcefdx6c.hasAttribute("data-loaded")) {
@@ -1518,11 +1518,11 @@ const processResponseData = async data => {
           if (user_interaction === false) {
             _0xcefdx12b = 1;
           }
-          for (let _0xcefdx6d = 1; _0xcefdx6d <= _0xcefdx12b && _0xcefdx6d <= _0xcefdx105.length - _0xcefdx8e; _0xcefdx6d++) {
+          for (let _0xcefdx6d = 1; _0xcefdx6d <= _0xcefdx12b && _0xcefdx6d <= all_image_urls.length - _0xcefdx8e; _0xcefdx6d++) {
             let _0xcefdx12c = _0xcefdx8e + _0xcefdx6d;
             let _0xcefdx12d = document.querySelector(`${'[data-page="'}${_0xcefdx12c}${'"]'}`);
             if (_0xcefdx12d.dataset.loaded !== "1" && !_0xcefdx12d.hasAttribute("data-loaded")) {
-              await _0xcefdx10a(_0xcefdx105[_0xcefdx12c - 1], _0xcefdx12d, false);
+              await _0xcefdx10a(all_image_urls[_0xcefdx12c - 1], _0xcefdx12d, false);
             }
           }
         }

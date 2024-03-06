@@ -1,3 +1,7 @@
+'''
+Collection of deobfuscation methods from scan-manga.com
+'''
+
 import re
 import json
 import base64
@@ -6,6 +10,7 @@ from Crypto.Util.Padding import pad
 from urllib.parse import unquote_to_bytes
 
 def _single_decode(d: str, e: int, f: int):
+    
     g = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/'
     h = g[:e]
     i = g[:f]
@@ -44,6 +49,7 @@ def decode(data: tuple[str | int]):
     return result
 
 def encrypt_sm(data: str, key: str, iv: str) -> tuple[str]:
+    
     key = bytes.fromhex(key)
     iv = bytes.fromhex(iv)
 
@@ -56,8 +62,6 @@ def encrypt_sm(data: str, key: str, iv: str) -> tuple[str]:
 
 def decode_chapter(data: str, idc: int) -> str:
     
-    # JSON.parse(atob(response_text.replace(new RegExp(idc.toString(16) + "$"), "").split("").reverse().join("")));
-    
     rule = hex(idc)[2:] + '$'
     raw = re.sub(rule, '', data)[::-1]
     
@@ -67,6 +71,5 @@ def decode_chapter(data: str, idc: int) -> str:
     
     buffer = base64.b64decode(raw)
     return json.loads(buffer)
-
 
 # EOF

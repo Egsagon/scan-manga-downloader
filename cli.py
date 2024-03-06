@@ -33,15 +33,16 @@ def fetch(url, method = 'GET', data = None, headers = None) -> requests.Response
 manga_url = input('[~] Enter URL > ').strip()
 assert manga_url
 
-if not 'lecture-en-ligne' in manga_url:
+if not 'lecture-en-ligne/' in manga_url:
   # Fetch Reader
   
-  raise NotImplementedError('Please use reader URL instead.')
+  # raise NotImplementedError('Please use reader URL instead.')
   
   print('[~] Fetching reader')
   page = fetch(manga_url).text
   readers = re_reader.findall(page)
-  assert readers
+  
+  assert readers, 'No reader URL found. Make sure this manga is available or directly provide a reader URL.'
   manga_url = readers[0]
 
 # Fetch manga page

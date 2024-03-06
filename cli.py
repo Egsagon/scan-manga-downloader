@@ -151,6 +151,7 @@ if __name__ == '__main__':
   except Exception as err:
     print('\x1b[91mUnhandled error:')
     traceback.print_tb(err.__traceback__)
+    print(err)
     print('\x1b[0m')
   
   input('\n\n\x1b[2mProcess terminated. Press Enter to close window.\x1b[0m')

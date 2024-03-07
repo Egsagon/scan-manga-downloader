@@ -13,22 +13,25 @@ import zipfile
 import requests
 import traceback
 
-root = 'https://www.scan-manga.com/'
+ROOT = 'https://www.scan-manga.com/'
+USER = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0'
 
 ps1 = '\x1b[1m[~]\x1b[0m'
 
-re_reader    = re.compile(r'href=\"(.*?\/lecture-en-ligne\/.*?)\"') # Extract reader URL
-re_sm_tuples = re.compile(r'\(\"(.*?)\",(\d+),\"(.*?)\",(\d+),(\d+),(\d+)\)', re.DOTALL) # Catch SML & SMI tuples
-re_sm_data   = re.compile(r'e\(\"(.+?)\".*?e\(\"(.+?)\".*?nent\(\"(.*?)\"\);', re.DOTALL) # Extract SMX encrypt keys 
-re_url_id    = re.compile(r'_(\d+)\.html') # Extract data id from URL
-re_manga_id  = re.compile(r'const idm = (\d+);') # Extract manga id
+re_reader    = re.compile(r'href=\"(.*?\/lecture-en-ligne\/.*?)\"'                       ) # Extract reader URL
+re_sm_tuples = re.compile(r'\(\"(.*?)\",(\d+),\"(.*?)\",(\d+),(\d+),(\d+)\)',  re.DOTALL ) # Catch SML & SMI tuples
+re_sm_data   = re.compile(r'e\(\"(.+?)\".*?e\(\"(.+?)\".*?nent\(\"(.*?)\"\);', re.DOTALL ) # Extract SMX encrypt keys 
+re_url_id    = re.compile(r'_(\d+)\.html'                                                ) # Extract data id from URL
+re_manga_id  = re.compile(r'const idm = (\d+);'                                          ) # Extract manga id
 
 session: requests.Session = None
 
 def init() -> None:
+    '''Initialise a new session.'''
+    
     global session
     session = requests.Session()
-    session.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0'
+    session.headers['User-Agent'] = USER
 
 def fetch(url, method = 'GET', data = None, headers = None) -> requests.Response:
     '''Request wrapper'''
@@ -38,6 +41,7 @@ def fetch(url, method = 'GET', data = None, headers = None) -> requests.Response
     return res
 
 def main() -> None:
+    '''Main script.'''
     
     print('\x1b[96m>>> scan-manga.com downloader\n\x1b[0m')
     init()
@@ -64,7 +68,7 @@ def main() -> None:
     manga_id = re_manga_id.findall(manga_page)[0]
 
     # Fetch manga chapters data
-    manga_data = fetch(root + f'api/chapter/{manga_id}.json').json()
+    manga_data = fetch(ROOT + f'api/chapter/{manga_id}.json').json()
     manga_dir = manga_data['m']
 
     print(ps1, 'Following chapters are available:')
@@ -106,8 +110,8 @@ def main() -> None:
     for chapter in tqdm.tqdm(chapters, desc = 'Total'):
 
         chapter_idc = chapter['i']
-        chapter_url = root + f'api/lel/{chapter_idc}.json'
-        chapter_html_url = root + 'lecture-en-ligne/' + chapter['u']
+        chapter_url = ROOT + f'api/lel/{chapter_idc}.json'
+        chapter_html_url = ROOT + 'lecture-en-ligne/' + chapter['u']
 
         chapter_page = fetch(
             url = chapter_url,

@@ -6,8 +6,8 @@
 - From source
 ```
 git clone https://github.com/Egsagon/scan-manga-downloader
-pip install -r requirements.txt
 cd scan-manga-downloader
+pip install -r requirements.txt
 python cli.py
 ```
 

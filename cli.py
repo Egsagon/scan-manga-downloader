@@ -10,11 +10,22 @@ import tqdm
 import json
 import decoder
 import zipfile
-import requests
 import traceback
+from curl_cffi import requests
 
 ROOT = 'https://www.scan-manga.com/'
-USER = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0'
+
+HEADERS = {
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8',
+    'Accept-Encoding': 'gzip, deflate, br, zstd',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Host': 'www.scan-manga.com',
+    'Priority': 'u=0, i',
+    'Upgrade-Insecure-Requests': '1',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+}
 
 ps1 = '\x1b[1m[~]\x1b[0m'
 
@@ -31,12 +42,12 @@ def init() -> None:
     
     global session
     session = requests.Session()
-    session.headers['User-Agent'] = USER
+    session.headers = HEADERS
 
 def fetch(url, method = 'GET', data = None, headers = None) -> requests.Response:
     '''Request wrapper'''
     
-    res = session.request(method, url, data = data, headers = headers)
+    res = session.request(method, url, data = data, headers = headers, impersonate = 'chrome')
     res.raise_for_status()
     return res
 
@@ -126,7 +137,7 @@ def main() -> None:
 
         chapter_data = decoder.decode_chapter(chapter_page, chapter_idc)
         manga_slug = chapter_data['s']
-        domain = 'data2.scan-manga.com'
+        domain = 'lel.scan-manga.com:8443'
 
         base_url = f'https://{domain}/{manga_slug}/{chapter_data["v"]}/{chapter_data["c"]}/'
 
